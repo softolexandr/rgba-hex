@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="uk">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>RGBA ⇄ HEX Converter</title>
+	<style>
+		:root{
+			--bg:#f6f7fb; --card:#fff; --text:#1c2230; --muted:#6b7280;
+			--border:#e5e7eb; --shadow:0 12px 30px rgba(16,24,40,.08);
+			--radius:16px; --gap:14px; --focus:0 0 0 4px rgba(59,130,246,.18);
+			--btn:#111827; --btnText:#fff; --btn2:#f3f4f6;
+		}
+		*{box-sizing:border-box}
+		body{margin:0;font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+		.wrap{max-width:980px;margin:28px auto;padding:0 16px 32px}
+		header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+		h1{margin:0;font-size:22px;letter-spacing:.2px}
+		.hint{color:var(--muted);font-size:13px}
+		.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+		@media (max-width:860px){.grid{grid-template-columns:1fr}}
+		.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+		.card h2{margin:0 0 12px;font-size:18px}
+		.row{display:flex;flex-wrap:wrap;gap:var(--gap);align-items:flex-end}
+		.field{flex:1 1 240px;min-width:240px}
+		label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+		input[type="text"]{width:100%;border:1px solid var(--border);border-radius:12px;padding:12px 12px;font-size:16px;outline:none;background:#fff}
+		input[type="text"]:focus{box-shadow:var(--focus);border-color:rgba(59,130,246,.5)}
+		.tiny{font-size:12px;color:var(--muted);margin-top:6px;min-height:16px}
+		.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+		button{border:0;border-radius:12px;padding:10px 12px;font-size:14px;cursor:pointer;user-select:none}
+		.btn-primary{background:var(--btn);color:var(--btnText)}
+		.btn-ghost{background:var(--btn2);color:var(--text);border:1px solid var(--border)}
+		.split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+		@media (max-width:540px){.split{grid-template-columns:1fr}}
+		.previewBox{border:1px solid var(--border);border-radius:16px;height:180px;background:repeating-conic-gradient(#e5e7eb 0% 25%,#fff 0% 50%) 50%/22px 22px;overflow:hidden;position:relative}
+		.previewColor{position:absolute;inset:14px;border-radius:14px;border:1px solid rgba(0,0,0,.06);background:rgba(214,218,220,1)}
+		.pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:13px;color:var(--muted);margin-top:10px}
+		.status{margin-top:12px;font-size:13px;color:var(--muted);min-height:18px}
+		.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;color:var(--text)}
+		.topTools{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+		input[type="color"]{width:46px;height:46px;padding:0;border:1px solid var(--border);border-radius:14px;background:#fff;cursor:pointer}
+		.out{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+		.outLine{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+		.outLine .value{flex:1 1 auto;border:1px solid var(--border);border-radius:12px;padding:12px;background:#fff;min-width:220px}
+	</style>
+</head>
+<body>
+<div class="wrap">
+	<header>
+		<div>
+			<h1>RGBA ⇄ HEX Converter</h1>
+			<div class="hint">Одне поле RGBA + Hex ↔ RGBA.</div>
+		</div>
+		<div class="topTools">
+			<div class="pill">
+				<span>Color picker</span>
+				<input id="picker" type="color" value="#d6dadc" aria-label="Color picker">
+			</div>
+		</div>
+	</header>
+
+	<div class="grid">
+		<div class="card">
+			<h2>RGBA → Hex</h2>
+
+			<div class="row">
+				<div class="field" style="min-width:100%">
+					<label for="rgbaIn">RGBA (приклад: rgba(0, 34, 56, 1) або rgb(0,34,56))</label>
+					<input id="rgbaIn" type="text" value="rgba(214, 218, 220, 1)" placeholder="rgba(0, 34, 56, 1)">
+					<div class="tiny" id="rgbaHint"></div>
+				</div>
+			</div>
+
+			<div class="out">
+				<div class="outLine">
+					<div class="value mono" id="rgbaNormalized">rgba(214, 218, 220, 1)</div>
+					<button class="btn-ghost" id="copyRgba">Copy RGBA</button>
+				</div>
+				<div class="outLine">
+					<div class="value mono" id="hex6Text">#D6DADC</div>
+					<button class="btn-ghost" id="copyHex6">Copy #RRGGBB</button>
+				</div>
+				<div class="outLine">
+					<div class="value mono" id="hex8Text">#D6DADCFF</div>
+					<button class="btn-ghost" id="copyHex8">Copy #RRGGBBAA</button>
+				</div>
+			</div>
+
+			<div class="actions">
+				<button class="btn-primary" id="applyRgba">Apply RGBA</button>
+				<button class="btn-ghost" id="reset">Reset example</button>
+			</div>
+
+			<div class="status" id="statusLeft"></div>
+		</div>
+
+		<div class="card">
+			<h2>Hex → RGBA</h2>
+
+			<div class="row">
+				<div class="field" style="min-width:100%">
+					<label for="hexIn">Hex (підтримка #RGB/#RGBA/#RRGGBB/#RRGGBBAA)</label>
+					<input id="hexIn" type="text" value="#d6dadc" placeholder="#d6dadc або #d6dadcff">
+					<div class="tiny" id="hexHint"></div>
+				</div>
+			</div>
+
+			<div class="split">
+				<div>
+					<div class="previewBox">
+						<div class="previewColor" id="preview"></div>
+					</div>
+					<div class="status" id="statusRight"></div>
+				</div>
+
+				<div>
+					<div class="pill" style="margin-top:0; width:100%; justify-content:space-between;">
+						<span>CSS preview</span>
+						<span class="mono" id="cssPreview">background: rgba(214, 218, 220, 1);</span>
+					</div>
+
+					<div class="actions" style="margin-top:14px">
+						<button class="btn-primary" id="applyHex">Apply Hex</button>
+						<button class="btn-ghost" id="copyCss">Copy CSS</button>
+					</div>
+
+					<div class="hint" style="margin-top:10px;">
+						* Альфа показується з точністю до 2 знаків.
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="hint" style="margin-top:14px;">
+		* Прев’ю має шахматний фон, щоб було видно прозорість (alpha).
+	</div>
+</div>
+
+<script>
+	(() => {
+		const $ = (id) => document.getElementById(id);
+
+		const els = {
+			rgbaIn: $("rgbaIn"),
+			rgbaHint: $("rgbaHint"),
+			rgbaNormalized: $("rgbaNormalized"),
+			hex6Text: $("hex6Text"),
+			hex8Text: $("hex8Text"),
+			picker: $("picker"),
+			hexIn: $("hexIn"),
+			hexHint: $("hexHint"),
+			preview: $("preview"),
+			cssPreview: $("cssPreview"),
+			statusLeft: $("statusLeft"),
+			statusRight: $("statusRight"),
+			applyRgba: $("applyRgba"),
+			applyHex: $("applyHex"),
+			reset: $("reset"),
+			copyRgba: $("copyRgba"),
+			copyHex6: $("copyHex6"),
+			copyHex8: $("copyHex8"),
+			copyCss: $("copyCss"),
+		};
+
+		function clamp(n, min, max){
+			n = Number(n);
+			if (Number.isNaN(n)) return min;
+			return Math.min(max, Math.max(min, n));
+		}
+
+		function toHex2(v){
+			const x = clamp(Math.round(Number(v)), 0, 255);
+			return x.toString(16).padStart(2, "0").toUpperCase();
+		}
+
+		function alphaToHex2(a){
+			const n = clamp(Number(a), 0, 1);
+			return Math.round(n * 255).toString(16).padStart(2, "0").toUpperCase();
+		}
+
+		function hex2ToAlpha(hh){
+			const n = parseInt(hh, 16);
+			return Math.round((n / 255) * 100) / 100;
+		}
+
+		function rgbaString(r,g,b,a){
+			return `rgba(${r}, ${g}, ${b}, ${a})`;
+		}
+
+		function cleanHex(s){
+			return (s || "")
+					.trim()
+					.replace(/\s+/g, "")
+					.replace(/^0x/i, "")
+					.replace(/^#/,"")
+					.toUpperCase();
+		}
+
+		function expandShortHex(hex){
+			if (hex.length === 3) return hex.split("").map(ch => ch+ch).join("") + "FF";
+			if (hex.length === 4) return hex.split("").map(ch => ch+ch).join("");
+			if (hex.length === 6) return hex + "FF";
+			if (hex.length === 8) return hex;
+			return null;
+		}
+
+		function parseHexToRGBA(hexInput){
+			const cleaned = cleanHex(hexInput);
+			const expanded = expandShortHex(cleaned);
+			if (!expanded) return { ok:false, error:"Невірна довжина. Треба 3/4/6/8 символів." };
+			if (!/^[0-9A-F]{8}$/.test(expanded)) return { ok:false, error:"Hex має містити тільки 0-9 та A-F." };
+
+			const r = parseInt(expanded.slice(0,2), 16);
+			const g = parseInt(expanded.slice(2,4), 16);
+			const b = parseInt(expanded.slice(4,6), 16);
+			const a = hex2ToAlpha(expanded.slice(6,8));
+
+			return { ok:true, r,g,b,a, hex8:`#${expanded}`, hex6:`#${expanded.slice(0,6)}` };
+		}
+
+		// --- RGBA PARSER (supports rgba(...), rgb(...), "0, 0, 0, 1", "0 0 0 / 1" etc.)
+		function parseRGBA(input){
+			if (!input || !String(input).trim()) return { ok:false, error:"Порожнє поле RGBA." };
+
+			let s = String(input).trim();
+
+			// normalize commas/spaces
+			// Accept:
+			// rgba(0,34,56,1)
+			// rgba(0 34 56 / 1)
+			// rgb(0,34,56)
+			// 0,34,56,1
+			// 0 34 56 1
+			// 0 34 56 / 1
+			s = s.replace(/\s+/g, " ");
+
+			// Extract inside parentheses if rgb/rgba present
+			const fnMatch = s.match(/^(rgba?|RGBA?)\((.*)\)$/);
+			let body = fnMatch ? fnMatch[2].trim() : s;
+
+			// Convert " / " alpha separator to comma
+			body = body.replace(/\s*\/\s*/g, ",");
+
+			// Now split by comma OR space
+			// First, if it contains commas -> split by commas
+			let parts;
+			if (body.includes(",")) {
+				parts = body.split(",").map(x => x.trim()).filter(Boolean);
+			} else {
+				parts = body.split(" ").map(x => x.trim()).filter(Boolean);
+			}
+
+			// rgb -> 3 parts, rgba -> 4 parts
+			if (parts.length !== 3 && parts.length !== 4) {
+				return { ok:false, error:"Невірний формат. Треба 3 або 4 значення (r,g,b[,a])." };
+			}
+
+			// Support percentages? (optional) We'll parse numeric; if ends with %, map to 0..255
+			function parseChannel(x){
+				if (/%$/.test(x)) {
+					const p = clamp(parseFloat(x), 0, 100);
+					return Math.round((p / 100) * 255);
+				}
+				return Math.round(clamp(parseFloat(x), 0, 255));
+			}
+
+			const r = parseChannel(parts[0]);
+			const g = parseChannel(parts[1]);
+			const b = parseChannel(parts[2]);
+
+			let a = 1;
+			if (parts.length === 4) {
+				let ax = parts[3];
+				if (/%$/.test(ax)) {
+					const p = clamp(parseFloat(ax), 0, 100);
+					a = p / 100;
+				} else {
+					a = parseFloat(ax);
+				}
+				if (Number.isNaN(a)) a = 1;
+				a = clamp(a, 0, 1);
+				a = Math.round(a * 100) / 100;
+			}
+
+			return { ok:true, r,g,b,a };
+		}
+
+		function updateUIFromRGBA(r,g,b,a, {silentHex=false} = {}){
+			const hex6 = `#${toHex2(r)}${toHex2(g)}${toHex2(b)}`;
+			const hex8 = `${hex6}${alphaToHex2(a)}`;
+			const rgba = rgbaString(r,g,b,a);
+
+			els.rgbaNormalized.textContent = rgba;
+			els.hex6Text.textContent = hex6;
+			els.hex8Text.textContent = hex8;
+
+			els.preview.style.background = rgba;
+			els.cssPreview.textContent = `background: ${rgba};`;
+
+			// picker can't store alpha
+			els.picker.value = hex6;
+
+			if (!silentHex) {
+				els.hexIn.value = hex6.toLowerCase();
+				els.hexHint.textContent = "";
+				els.statusRight.textContent = "";
+			}
+		}
+
+		function applyRgba(){
+			const res = parseRGBA(els.rgbaIn.value);
+			if (!res.ok) {
+				els.rgbaHint.textContent = res.error;
+				els.statusLeft.textContent = "Не можу застосувати RGBA: перевір формат.";
+				return;
+			}
+
+			els.rgbaHint.textContent = "";
+			els.statusLeft.textContent = "Готово: RGBA застосовано.";
+			setTimeout(() => els.statusLeft.textContent = "", 1200);
+
+			// Normalize input to canonical rgba(...)
+			els.rgbaIn.value = rgbaString(res.r, res.g, res.b, res.a);
+
+			updateUIFromRGBA(res.r, res.g, res.b, res.a);
+		}
+
+		function applyHex(){
+			const res = parseHexToRGBA(els.hexIn.value);
+			if (!res.ok) {
+				els.hexHint.textContent = res.error;
+				els.statusRight.textContent = "Не можу застосувати Hex: перевір формат.";
+				return;
+			}
+
+			els.hexHint.textContent = "";
+			els.statusRight.textContent = "Готово: Hex застосовано.";
+			setTimeout(() => els.statusRight.textContent = "", 1200);
+
+			// Update RGBA input (canonical)
+			els.rgbaIn.value = rgbaString(res.r, res.g, res.b, res.a);
+
+			updateUIFromRGBA(res.r, res.g, res.b, res.a, {silentHex:true});
+
+			// normalize hex input to 6-digit (like your example)
+			els.hexIn.value = res.hex6.toLowerCase();
+		}
+
+		async function copyText(text, statusEl){
+			try{
+				await navigator.clipboard.writeText(text);
+				statusEl.textContent = "Скопійовано ✅";
+				setTimeout(() => { statusEl.textContent = ""; }, 1200);
+			}catch(e){
+				statusEl.textContent = "Не вдалося скопіювати (дозволь доступ до clipboard).";
+			}
+		}
+
+		// Events
+		els.applyRgba.addEventListener("click", applyRgba);
+		els.applyHex.addEventListener("click", applyHex);
+
+		els.rgbaIn.addEventListener("keydown", (e) => { if (e.key === "Enter") applyRgba(); });
+		els.hexIn.addEventListener("keydown", (e) => { if (e.key === "Enter") applyHex(); });
+
+		// Live update (optional): update as you type, but only if parse ok
+		els.rgbaIn.addEventListener("input", () => {
+			const res = parseRGBA(els.rgbaIn.value);
+			if (!res.ok) { els.rgbaHint.textContent = res.error; return; }
+			els.rgbaHint.textContent = "";
+			updateUIFromRGBA(res.r, res.g, res.b, res.a);
+		});
+
+		els.hexIn.addEventListener("input", () => {
+			const res = parseHexToRGBA(els.hexIn.value);
+			if (!res.ok) { els.hexHint.textContent = res.error; return; }
+			els.hexHint.textContent = "";
+			// update UI, but don't overwrite hex field while typing
+			els.rgbaIn.value = rgbaString(res.r, res.g, res.b, res.a);
+			updateUIFromRGBA(res.r, res.g, res.b, res.a, {silentHex:true});
+		});
+
+		els.picker.addEventListener("input", () => {
+			els.hexIn.value = els.picker.value;
+			applyHex();
+		});
+
+		els.reset.addEventListener("click", () => {
+			els.rgbaIn.value = "rgba(214, 218, 220, 1)";
+			els.hexIn.value = "#d6dadc";
+			els.rgbaHint.textContent = "";
+			els.hexHint.textContent = "";
+			applyRgba();
+		});
+
+		els.copyRgba.addEventListener("click", () => copyText(els.rgbaNormalized.textContent, els.statusLeft));
+		els.copyHex6.addEventListener("click", () => copyText(els.hex6Text.textContent, els.statusLeft));
+		els.copyHex8.addEventListener("click", () => copyText(els.hex8Text.textContent, els.statusLeft));
+		els.copyCss.addEventListener("click", () => copyText(els.cssPreview.textContent, els.statusRight));
+
+		// init
+		applyRgba();
+	})();
+</script>
+</body>
+</html>
